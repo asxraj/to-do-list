@@ -1,30 +1,26 @@
+import React, { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
+import TodoForm from "../components/TodoForm";
 import Todolist from "../components/Todolist";
 
-const Home: NextPage = () => {
-  return (
-    <div className="flex flex-col justify-start  bg-gradient-to-r from-green-500 to-green-700 min-h-screen">
-      <Head>
-        <title>Todolist</title>
-        <meta name="description" content="" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+import { Todo } from "../utils/types";
 
-      <div className="flex gap-6 justify-center my-10">
-        <div className="">
-          <label htmlFor="todo" className="justfy-center">
-            Todo
-          </label>
-        </div>
-        <input
-          name="todo"
-          type="text"
-          className="rounded-md w-[300px] py-1 active:border-none"
-        />
-      </div>
-      <div className="flex justify-center">
-        <Todolist />
+const Home: NextPage = () => {
+  const [todos, setTodos] = useState<Todo[]>([]);
+
+  return (
+    <div className="bg-gradient-to-r from-sky-400 to-blue-500 min-h-screen">
+      <div className="flex flex-col justify-center w-[70vw] mx-auto">
+        <Head>
+          <title>Todolist</title>
+          <meta name="description" content="" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+
+        <TodoForm setTodos={setTodos} todos={todos} />
+
+        <Todolist todos={todos} setTodos={setTodos} />
       </div>
     </div>
   );

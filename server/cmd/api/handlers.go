@@ -1,18 +1,34 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
-	err := app.todos.AddTodo("This is the database")
+	var input struct {
+		Task string `json:"task"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	fmt.Fprint(w, "Successfully added todo to database")
+	err = app.todos.AddTodo(input.Task)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, map[string]string{"data": "Successfully Sent"}, nil)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 func (app *application) getTodos(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +46,28 @@ func (app *application) getTodos(w http.ResponseWriter, r *http.Request) {
 	err = app.writeJSON(w, http.StatusOK, env, nil)
 	if err != nil {
 		app.serverError(w, err)
+	}
+
+}
+
+func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+
+	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+	if err != nil || id < 1 {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	err = app.todos.DeleteTodo(id)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, map[string]any{"message": "todo successfully deleted"}, nil)
+	if err != nil {
+		app.serverError(w, err)
+
 	}
 
 }

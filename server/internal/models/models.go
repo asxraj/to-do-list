@@ -56,3 +56,24 @@ func (m *TodoModel) AddTodo(task string) error {
 
 	return nil
 }
+
+func (m *TodoModel) DeleteTodo(id int64) error {
+
+	query := `DELETE FROM todos WHERE id = $1`
+
+	result, err := m.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return err
+	}
+
+	return nil
+}
